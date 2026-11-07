@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Games Condo</title>
+    <style>
+        /* Base Reset & Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== INTRO LOADING ANIMATION ===== */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 9999;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        #loader.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f472b6;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: logoPop 0.8s ease forwards;
+        }
+
+        .loader-bar {
+            width: 200px;
+            height: 6px;
+            background: #334155;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .loader-bar span {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #f472b6, #db2777);
+            border-radius: 10px;
+            animation: loadBar 1.4s ease forwards;
+        }
+
+        .loader-text {
+            color: #94a3b8;
+            font-size: 13px;
+            letter-spacing: 1px;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes logoPop {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes loadBar {
+            to { width: 100%; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ===== CONTENT ENTRANCE ANIMATION ===== */
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Header / Navbar */
+        header {
+            background-color: #1e293b;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.7s ease 1.5s both;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f472b6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            background: #f472b6;
+            color: #0f172a;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #f472b6;
+        }
+
+        /* Main Content Container */
+        main.container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Section Title */
+        .section-header {
+            margin-bottom: 25px;
+            border-left: 4px solid #f472b6;
+            padding-left: 15px;
+            animation: fadeUp 0.7s ease 1.7s both;
+        }
+
+        .section-header h2 {
+            font-size: 24px;
+            color: #f1f5f9;
+        }
+
+        .section-header p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        /* Grid Game Cards */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* Game Card Styling */
+        .game-card {
+            background-color: #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            animation: fadeUp 0.8s ease 1.9s both;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(244, 114, 182, 0.25);
+            border-color: #f472b6;
+        }
+
+        .game-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .game-media {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: #334155;
+            transition: transform 0.5s ease;
+        }
+
+        .game-card:hover .game-media {
+            transform: scale(1.08);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #22c55e;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #22c55e;
+            backdrop-filter: blur(4px);
+            z-index: 10;
+        }
+
+        /* ===== BAGIAN INFO & AVATAR ===== */
+        .game-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background-color: #1e293b;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .player-status-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #f472b6; /* Warna border pink */
+            object-fit: cover;
+            margin-right: -10px; /* Efek tumpuk */
+            background-color: #000;
+            position: relative;
+        }
+
+        .avatar-img:nth-child(1) { z-index: 3; }
+        .avatar-img:nth-child(2) { z-index: 2; }
+        .avatar-img:nth-child(3) { z-index: 1; margin-right: 0; }
+
+        .online-count {
+            font-size: 15px;
+            color: #9ca3af;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+
+        .btn-play {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px 0;
+            background: linear-gradient(135deg, #f472b6, #db2777);
+            color: #ffffff;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(244, 114, 182, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-play:hover {
+            background: linear-gradient(135deg, #db2777, #be185d);
+            box-shadow: 0 6px 18px rgba(244, 114, 182, 0.5);
+        }
+
+        .btn-play:active {
+            transform: scale(0.98);
+        }
+
+        footer {
+            background-color: #1e293b;
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 14px;
+            border-top: 1px solid #334155;
+            margin-top: 40px;
+            animation: fadeUp 0.7s ease 2.1s both;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .logo { font-size: 18px; }
+            .nav-links a { font-size: 14px; margin-left: 10px; }
+            main.container { margin: 20px auto; }
+            .game-image-wrapper { height: 180px; }
+            .loader-logo { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INTRO LOADER -->
+    <div id="loader">
+        <div class="loader-logo">PlayGames Condo</div>
+        <div class="loader-bar"><span></span></div>
+        <div class="loader-text">LOADING SERVER...</div>
+    </div>
+
+    <!-- Top Navigation -->
+    <header>
+        <div class="logo">
+            PlayGames Condo
+            <span class="logo-badge">V2</span>
+        </div>
+        <nav class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Games</a>
+            <a href="#" target="_blank">Discord</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="section-header">
+            <h2>Private Server</h2>
+            <p>Click the button below to join the game server.</p>
+        </div>
+
+        <div class="game-grid">
+            <div class="game-card">
+                <div class="game-image-wrapper">
+                    <span class="status-badge">● ONLINE</span>
+                    <video class="game-media" autoplay loop muted playsinline>
+                        <source src="https://files.catbox.moe/ijfz6l.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                
+                <div class="game-info">
+                    <h2 class="game-title">Server 01</h2>
+                    
+                    <div class="player-status-row">
+                        <!-- 3 LINGKARAN KECIL DENGAN 3 LINK CATBOX MASING-MASING -->
+                        <div class="avatar-group">
+                            <img src="https://files.catbox.moe/82yt96.jpg" alt="Avatar 1" class="avatar-img">
+                            <img src="https://files.catbox.moe/720v9s.jpg" alt="Avatar 2" class="avatar-img">
+                            <img src="https://files.catbox.moe/0zs1x6.jpg" alt="Avatar 3" class="avatar-img">
+                        </div>
+                        <span class="online-count">6 / 12 Online</span>
+                    </div>
+
+                    <a href="https://www.roblox.com.ss/games/14153443454/Meet-a-neko?privateServerLinkCode=68302942127713751627885530538936" target="_blank" class="btn-play">JOIN SERVER</a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 PlayGames Condo
+    </footer>
+
+    <script>
+        // Hide the loader after 1.6 seconds
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loader').classList.add('hide');
+            }, 1600);
+        });
+    </script>
+
+</body>
+</html>
